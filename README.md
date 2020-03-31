@@ -70,7 +70,7 @@ php artisan vendor:publish --provider="Unrelaxs\eslog\EslogServiceProvider"
 php artisan make:index-configurator \\App\\Elasticsearch\\LogIndexConfigurator
 ```
 
-例如索引配置文件配置LogIndexConfigurator如下
+此步骤可忽略，例如索引配置文件配置LogIndexConfigurator如下
 
 ```
     protected $settings = [
