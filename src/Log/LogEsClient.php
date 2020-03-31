@@ -39,7 +39,6 @@ class LogEsClient {
         $log->content = $record['message'];
         $log->level = $record['level_name'];
         $res = $log->save();
-        var_dump($res);die;
     }
     public function close() {
 
