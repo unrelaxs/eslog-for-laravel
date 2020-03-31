@@ -97,7 +97,7 @@ php artisan elastic:create-index "\App\Elasticsearch\LogIndexConfigurator"
 ```
 
 
-执行命令 把上面执行命令返回model路径 映射到es服务器:
+执行命令 把上面执行命令返回model 映射到es服务器:
 
 ```
 php artisan elastic:update-mapping "\Unrelaxs\Eslog\Model\LogModel"
