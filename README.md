@@ -121,6 +121,6 @@ Route::get('/', function () {
 ## 参考文献
 
 
-[laravel-elastic文档](https://github.com/babenkoivan/scout-elasticsearch-driver)
-[中文分析器安装教程](https://blog.csdn.net/wolfcode_cn/article/details/81907220)
+- [laravel-elastic文档](https://github.com/babenkoivan/scout-elasticsearch-driver)
+- [中文分析器安装教程](https://blog.csdn.net/wolfcode_cn/article/details/81907220)
 
