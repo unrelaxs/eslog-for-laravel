@@ -90,17 +90,19 @@ php artisan make:index-configurator \\App\\Elasticsearch\\LogIndexConfigurator
 php artisan unrelaxs:create-mapping "\App\Elasticsearch\LogIndexConfigurator"
 ```
 
+执行命令向es服务器创建索引 :
+
+```
+php artisan elastic:create-index "\App\Elasticsearch\LogIndexConfigurator"
+```
+
+
 执行命令 把上面执行命令返回model路径 映射到es服务器:
 
 ```
 php artisan elastic:update-mapping "\Unrelaxs\Eslog\Model\LogModel"
 ```
 
-执行命令向es服务器创建索引 :
-
-```
-php artisan elastic:create-index "\App\Elasticsearch\LogIndexConfigurator"
-```
 
 
 在客户端调用Log::info('你好啊');，如在routes/web.php中这样
