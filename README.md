@@ -38,16 +38,11 @@ php artisan vendor:publish --provider="Unrelaxs\eslog\EslogServiceProvider"
 ```
 
 
-在这个文件修改 `config/scout.php`:
-
-```
-    'driver' => env('SCOUT_DRIVER', 'elastic'),
-```
-
 在这个文件添加配置，指定elastic服务器的链接:端口 `.evn`:
 
 ```
-    SCOUT_ELASTIC_HOST=http://域名:9200
+    SCOUT_DRIVER=elastic #指定使用elastic
+    SCOUT_ELASTIC_HOST=http://域名:9200 #es服务器的链接
 ```
 
 在这个文件修改 `config/logging.php`:
