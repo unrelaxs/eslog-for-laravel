@@ -22,7 +22,7 @@ is disabled, add the following providers in `config/app.php`:
 'providers' => [
     Laravel\Scout\ScoutServiceProvider::class,
     ScoutElastic\ScoutElasticServiceProvider::class,
-    ScoutElastic\ScoutElasticServiceProvider::class,
+    Unrelaxs\eslog\EslogServiceProvider::class,
 ]
 ```
 
