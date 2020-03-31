@@ -65,6 +65,10 @@ config/logging.php修改如下
              ]
         ]
 
+//向es服务器创建索引
+php artisan php artisan elastic:create-index "\App\Elasticsearch\LogIndexConfigurator"
+//把logmodel映射到es服务器
+php artisan elastic:update-mapping "\Unrelaxs\Eslog\Model"
 在客户端调用Log::info('你好啊');
 这时es的服务器就有该条记录了
 ```
