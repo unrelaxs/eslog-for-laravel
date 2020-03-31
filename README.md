@@ -5,9 +5,20 @@ elastic文档： https://github.com/babenkoivan/scout-elasticsearch-driver
 
 ```
 composer require unrelaxs/eslog
+config/app.php添加上
+"providers": [
+    "\Unrelaxs\Eslog\EslogServiceProvider::class",
+    Laravel\Scout\ScoutServiceProvider::class,
+    ScoutElastic\ScoutElasticServiceProvider::class,
+]
+php artisan vendor:publish --provider="Laravel\Scout\ScoutServiceProvider"
+php artisan vendor:publish --provider="ScoutElastic\ScoutElasticServiceProvider"
 php artisan vendor:publish
-php artisan make:index-configurator \\App\\Elasticsearch\\LogIndexConfigurator
+.env文件配置
+SCOUT_ELASTIC_HOST=http://es.wlcat.com:9200
 
+#创建一个索引配置文件
+php artisan make:index-configurator \\App\\Elasticsearch\\LogIndexConfigurator
 LogIndexConfigurator.php内容如下
 <?php
 
@@ -41,34 +52,38 @@ class LogIndexConfigurator extends IndexConfigurator
 
 下面的命令需指定刚刚创建的index索引配置文件
 php artisan unrelaxs:create-mapping "\App\Elasticsearch\LogIndexConfigurator"
+#log日志model迁移
 php artisan migrate
 接下来配置些东西
-config/app.php添加上
-"providers": ["\Unrelaxs\Eslog\EslogServiceProvider::class"]
-
 config/logging.php修改如下
     'default' => env('LOG_CHANNEL', 'stack'),
     'channels' => [
             'stack' => [
                 'driver' => 'stack',
-                'channels' => ['daily', 'custom'],
+                'channels' => ['daily', 'custom'],  //注意，这里不能少了custom
                 'ignore_exceptions' => false,
             ],
              //elasticsearch
-             'custom'  => [
+             'custom'  => [  //上面指定了custom, 这里的配置才生效
                         'driver' => 'custom',
-                        'via' => Unrelaxs\Eslog\Log\Handler\CreateEsLogger::class,
-                        'url' =>  'http://es.wlcat.com',
-                        'port'=> '9200',
+                        'via' => Unrelaxs\Eslog\Log\Handler\CreateEsLogger::class, //指定创建es的logger扩展包
+                        'url' =>  'http://es.wlcat.com',  //es的链接
+                        'port'=> '9200',        //es的端口
                         'index'=> 'laralog', //es的索引名
                         'toDB' => false, //是否写入数据库
              ]
         ]
 
 //向es服务器创建索引
-php artisan php artisan elastic:create-index "\App\Elasticsearch\LogIndexConfigurator"
+php artisan elastic:create-index "\App\Elasticsearch\LogIndexConfigurator"
 //把logmodel映射到es服务器
-php artisan elastic:update-mapping "\Unrelaxs\Eslog\Model"
+php artisan elastic:update-mapping "\Unrelaxs\Eslog\Model\LogModel"
 在客户端调用Log::info('你好啊');
+如在routes/web.php中这样
+Route::get('/', function () {
+    \Illuminate\Support\Facades\Log::info('成功加载');  //记录日志，将自动把数据推送到es服务器
+    return view('welcome');
+});
+
 这时es的服务器就有该条记录了
 ```
