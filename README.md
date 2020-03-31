@@ -1,89 +1,126 @@
-```
-elastic文档： https://github.com/babenkoivan/scout-elasticsearch-driver
-中文分析器安装教程：https://blog.csdn.net/wolfcode_cn/article/details/81907220
-```
+## Requirements
+
+The package has been tested in the following configuration:
+
+* PHP version &gt;=7.1.3, &lt;=7.3
+* Laravel Framework version &gt;=5.8, &lt;=6
+* Elasticsearch version &gt;=7
+
+
+## Installation
+
+Use composer to install the package:
 
 ```
-composer require unrelaxs/eslog
-config/app.php添加上
-"providers": [
-    "\Unrelaxs\Eslog\EslogServiceProvider::class",
+composer require unrelaxs/eslog-for-laravel
+```
+
+如果你的laravel框架版本 &lt;= 5.4 or [the package discovery](https://laravel.com/docs/5.5/packages#package-discovery)
+is disabled, add the following providers in `config/app.php`:
+
+```php
+'providers' => [
     Laravel\Scout\ScoutServiceProvider::class,
     ScoutElastic\ScoutElasticServiceProvider::class,
+    ScoutElastic\ScoutElasticServiceProvider::class,
 ]
+```
+
+
+## Configuration
+
+执行发布命令
+
+```
 php artisan vendor:publish --provider="Laravel\Scout\ScoutServiceProvider"
 php artisan vendor:publish --provider="ScoutElastic\ScoutElasticServiceProvider"
-php artisan vendor:publish
-.env文件配置
-SCOUT_ELASTIC_HOST=http://es.wlcat.com:9200
+php artisan vendor:publish --provider="Unrelaxs\eslog\EslogServiceProvider"
+```
 
-#创建一个索引配置文件
+
+在这个文件修改 `config/scout.php`:
+
+```
+    'driver' => env('SCOUT_DRIVER', 'elastic'),
+```
+
+在这个文件添加配置，指定elastic服务器的链接:端口 `.evn`:
+
+```
+    SCOUT_ELASTIC_HOST=http://域名:9200
+```
+
+在这个文件修改 `config/logging.php`:
+
+```
+    'channels' => [
+        'stack' => [
+            'driver' => 'stack',
+            'channels' => ['custom'],  //这里至少指定 custom
+            'ignore_exceptions' => false,
+        ],
+        'custom'  => [
+            'driver' => 'custom',
+            'via' => Unrelaxs\Eslog\Log\Handler\CreateEsLogger::class, //指定创建es的logger扩展包
+            'url' =>  'http://ip', es的链接
+            'port'=> '9200',
+            'index'=> 'laralog', //es的索引名
+            'toDB' => false, //是否写入数据库
+        ]
+```
+
+创建一个索引配置文件:
+
+```
 php artisan make:index-configurator \\App\\Elasticsearch\\LogIndexConfigurator
-LogIndexConfigurator.php内容如下
-<?php
+```
 
-namespace App\Elasticsearch;
+例如索引配置文件配置LogIndexConfigurator如下
 
-use ScoutElastic\IndexConfigurator;
-use ScoutElastic\Migratable;
-
-/**关于日志的索引配置
- * Class LogIndexConfigurator
- * @package App\Elasticsearch
- */
-class LogIndexConfigurator extends IndexConfigurator
-{
-    use Migratable;
-
-    protected $name = 'laralog';
-    /**
-     * @var array
-     */
+```
     protected $settings = [
-        'analysis' => [
-            'analyzer' => [
-                'default' => [
-                    'type' => 'ik_max_word',  //默认的分词器, 因为我独自安装了中文分析器
+            'analysis' => [
+                'analyzer' => [
+                    'default' => [
+                        'type' => 'ik_max_word',  //默认的分词器, 因为我独自安装了中文分析器，如何安装，请参考下面文献
+                    ]
                 ]
             ]
-        ]
-    ];
-}
+        ];
+```
 
-下面的命令需指定刚刚创建的index索引配置文件
+执行命令 生成一个logModel指向一个索引:
+
+```
 php artisan unrelaxs:create-mapping "\App\Elasticsearch\LogIndexConfigurator"
-#log日志model迁移
-php artisan migrate
-接下来配置些东西
-config/logging.php修改如下
-    'default' => env('LOG_CHANNEL', 'stack'),
-    'channels' => [
-            'stack' => [
-                'driver' => 'stack',
-                'channels' => ['daily', 'custom'],  //注意，这里不能少了custom
-                'ignore_exceptions' => false,
-            ],
-             //elasticsearch
-             'custom'  => [  //上面指定了custom, 这里的配置才生效
-                        'driver' => 'custom',
-                        'via' => Unrelaxs\Eslog\Log\Handler\CreateEsLogger::class, //指定创建es的logger扩展包
-                        'url' =>  'http://es.wlcat.com',  //es的链接
-                        'port'=> '9200',        //es的端口
-                        'index'=> 'laralog', //es的索引名
-                        'toDB' => false, //是否写入数据库
-             ]
-        ]
+```
 
-//向es服务器创建索引
+执行命令向es服务器创建索引 :
+
+```
 php artisan elastic:create-index "\App\Elasticsearch\LogIndexConfigurator"
-//把logmodel映射到es服务器
+```
+
+执行命令 把上面执行命令返回model路径 映射到es服务器:
+
+```
 php artisan elastic:update-mapping "\Unrelaxs\Eslog\Model\LogModel"
-在客户端调用Log::info('你好啊');
-如在routes/web.php中这样
+```
+
+在客户端调用Log::info('你好啊');，如在routes/web.php中这样
+
+```
 Route::get('/', function () {
     \Illuminate\Support\Facades\Log::info('成功加载');  //记录日志，将自动把数据推送到es服务器
     return view('welcome');
 });
-
-这时es的服务器就有该条记录了
 ```
+
+去es服务器查看效果吧！
+
+## 参考文献
+
+
+[laravel-elastic文档](https://github.com/babenkoivan/scout-elasticsearch-driver)
+[中文分析器安装教程](https://blog.csdn.net/wolfcode_cn/article/details/81907220)
+
