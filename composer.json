@@ -2,7 +2,7 @@
     "name": "unrelaxs/eslog-for-laravel",
     "description": "about laravel log to elasticsearch",
     "require": {
-        "babenkoivan/scout-elasticsearch-driver": "^4.0"
+        "babenkoivan/scout-elasticsearch-driver": "^4.2.1"
     },
     "autoload": {
         "psr-4": {
